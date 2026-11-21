@@ -7,7 +7,7 @@ pub enum RusdiError {
     #[error("Falha ao inicializar EGL: {0}")]
     EglInit(String),
 
-    #[error("Falha ao criar superf√≠cie EGL: {0}")]
+    #[error("Falha ao criar superfÌcie EGL: {0}")]
     EglSurface(String),
 
     #[error("Erro no SDL2: {0}")]
@@ -16,13 +16,13 @@ pub enum RusdiError {
     #[error("Erro de I/O: {0}")]
     Io(#[from] std::io::Error),
 
-    #[error("Erro de serializa√ß√£o JSON: {0}")]
+    #[error("Erro de serializaÁ„o JSON: {0}")]
     Json(#[from] serde_json::Error),
 
-    #[error("Erro de configura√ß√£o: {0}")]
+    #[error("Erro de configuraÁ„o: {0}")]
     Config(String),
 
-    #[error("Falha no player de m√≠dia: {0}")]
+    #[error("Falha no player de mÌdia: {0}")]
     MediaPlayer(String),
 
     #[error("Erro no banco de dados: {0}")]
@@ -37,14 +37,17 @@ pub enum RusdiError {
     #[error("Erro de sinal: {0}")]
     Signal(#[from] signal_hook::Error),
 
-    #[error("Recurso n√£o encontrado: {0}")]
+    #[error("Recurso n„o encontrado: {0}")]
     NotFound(String),
 
-    #[error("Opera√ß√£o n√£o suportada: {0}")]
+    #[error("OperaÁ„o n„o suportada: {0}")]
     Unsupported(String),
 
     #[error("Falha no FFmpeg: {0}")]
     Ffmpeg(#[from] ffmpeg_next::Error),
+
+    #[error("Erro JSON-RPC: {0}")]
+    JsonRpc(String),
 }
 
 pub type Result<T> = std::result::Result<T, RusdiError>;
