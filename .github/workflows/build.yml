@@ -16,14 +16,28 @@ jobs:
       
       - name: Install system dependencies
         run: |
+          set -x
           sudo apt-get update
+          
+          # Try to install armhf packages, skip if not available
           sudo apt-get install -y \
             gcc-arm-linux-gnueabihf libc6-dev-armhf-cross \
+            pkg-config cmake \
+            nodejs npm \
+            qemu-user-static 2>&1 | tee install.log
+          
+          # Try SDL2/EGL/GLES armhf packages (may not exist on all Ubuntu versions)
+          sudo apt-get install -y \
             libsdl2-dev:armhf libsdl2-image-dev:armhf libsdl2-ttf-dev:armhf \
             libegl1-mesa-dev:armhf libgles2-mesa-dev:armhf \
-            libwayland-dev:armhf pkg-config cmake \
-            nodejs npm \
-            qemu-user-static
+            libwayland-dev:armhf 2>&1 | tee -a install.log || echo "Some armhf packages unavailable, continuing..."
+          
+          # Verify cross-compiler
+          arm-linux-gnueabihf-gcc --version
+          
+          # Show pkg-config paths for debugging
+          echo "=== PKG_CONFIG_PATH ===" 
+          pkg-config --variable=pc_path pkg-config || true
       
       - name: Install Rust (armv7 target)
         uses: dtolnay/rust-toolchain@stable
@@ -40,12 +54,25 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
       
       - name: Install ares-cli
-        run: npm install -g @webosose/ares-cli
+        run: |
+          npm install -g @webosose/ares-cli
+          # Verify ares-package is available
+          which ares-package || find /usr -name "ares-package" 2>/dev/null || npm list -g @webosose/ares-cli
       
       - name: Build IPK
         run: |
+          set -x
           chmod +x packaging/build.sh
-          ./packaging/build.sh armv7-unknown-linux-gnueabihf
+          
+          # Set PKG_CONFIG_PATH for cross-compilation
+          export PKG_CONFIG_ALLOW_CROSS=1
+          export PKG_CONFIG_PATH=/usr/lib/arm-linux-gnueabihf/pkgconfig:/usr/share/pkgconfig:${PKG_CONFIG_PATH}
+          
+          # Verbose cargo build
+          cargo build --release --target=armv7-unknown-linux-gnueabihf --verbose 2>&1 | tee cargo_build.log
+          
+          # Run the packaging script
+          ./packaging/build.sh armv7-unknown-linux-gnueabihf 2>&1 | tee package_build.log
       
       - name: Upload IPK artifact
         uses: actions/upload-artifact@v4
@@ -53,3 +80,13 @@ jobs:
           name: rusdi-webos-ipk
           path: rusdi-webos_21.0.0_armv7_unknown_linux_gnueabihf.ipk
           retention-days: 30
+      
+      - name: Upload build logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-logs
+          path: |
+            cargo_build.log
+            package_build.log
+          retention-days: 7
