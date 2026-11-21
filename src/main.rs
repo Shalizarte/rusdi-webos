@@ -3,7 +3,7 @@
 
 use crate::error::Result;
 use crate::lifecycle::LifeCycleManager;
-use crate::logging::{init_logger, log_info, log_error};
+use crate::logging::init_logger;
 use crate::settings::Settings;
 use std::env;
 
@@ -12,12 +12,12 @@ async fn main() -> Result<()> {
     let args: Vec<String> = env::args().collect();
     let verbose = args.iter().any(|a| a == "-v" || a == "--verbose");
 
-    let logger = init_logger(verbose);
-    log_info!(logger, "=== Rusdi webOS v{} ===", env!("CARGO_PKG_VERSION"));
-    log_info!(logger, "Target: {}", env!("CARGO_PKG_TARGET"));
+    let _logger = init_logger(verbose);
+    log_info!("=== Rusdi webOS v{} ===", env!("CARGO_PKG_VERSION"));
+    log_info!("Target: armv7-unknown-linux-gnueabihf");
 
     let settings = Settings::load().unwrap_or_default();
-    log_info!(logger, "Settings: {:?}", settings);
+    log_info!("Settings: {:?}", settings);
 
     let mut lifecycle = LifeCycleManager::new(settings)?;
     lifecycle.setup_signal_handlers().await?;
@@ -25,12 +25,12 @@ async fn main() -> Result<()> {
 
     let mut shutdown_rx = lifecycle.shutdown_tx.subscribe();
     tokio::select! {
-        _ = shutdown_rx.changed() => { if *shutdown_rx.borrow() { log_info!(logger, "Shutdown"); } }
-        _ = tokio::signal::ctrl_c() => { log_info!(logger, "Ctrl-C"); }
+        _ = shutdown_rx.changed() => { if *shutdown_rx.borrow() { log_info!("Shutdown"); } }
+        _ = tokio::signal::ctrl_c() => { log_info!("Ctrl-C"); }
     }
 
     lifecycle.terminate().await?;
-    log_info!(logger, "=== Rusdi webOS finalizado ===");
+    log_info!("=== Rusdi webOS finalizado ===");
     Ok(())
 }
 
