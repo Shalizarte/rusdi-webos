@@ -1,4 +1,4 @@
-//! Cliente JSON-RPC para comunicaÃ§Ã£o com Kodi (HTTP + WebSocket).
+//! Cliente JSON-RPC para comunicação com Kodi (HTTP + WebSocket).
 
 use crate::error::{RusdiError, Result};
 use jsonrpsee::http_client::HttpClient;

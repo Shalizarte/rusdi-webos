@@ -58,7 +58,7 @@ impl AddonManager {
             "xbmc.addon.executable" => {
                 self.load_native_addon(manifest)?;
             }
-            _ => { log_warn!(crate::logging::init_logger(false), "Tipo de addon nÃ£o suportado: {}", manifest.type_); }
+            _ => { log_warn!("Tipo de addon não suportado: {}", manifest.type_); }
         }
         Ok(())
     }

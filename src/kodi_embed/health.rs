@@ -1,4 +1,4 @@
-//! Monitoramento de saÃºde avanÃ§ado (CPU, memÃ³ria, logs Rusdi).
+//! Monitoramento de saúde avançado (CPU, memória, logs Rusdi).
 
 use crate::error::{RusdiError, Result};
 use std::fs;
@@ -34,7 +34,7 @@ impl HealthMonitor {
         for line in new_content.lines() {
             for kw in &self.crash_keywords {
                 if line.contains(kw) {
-                    log_error!(crate::logging::init_logger(false), "Crash detectado no log Rusdi: {}", line);
+                    log_error!("Crash detectado no log Rusdi: {}", line);
                     return Ok(true);
                 }
             }

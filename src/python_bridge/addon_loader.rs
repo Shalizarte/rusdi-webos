@@ -1,4 +1,4 @@
-//! Loader especÃ­fico para addons Python do Kodi/Rusdi.
+//! Loader específico para addons Python do Kodi/Rusdi.
 
 use crate::error::{RusdiError, Result};
 use crate::python_bridge::interpreter::PythonInterpreter;

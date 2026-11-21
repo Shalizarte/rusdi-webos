@@ -35,7 +35,7 @@ impl LifeCycleManager {
     }
 
     pub async fn initialize(&mut self) -> Result<()> {
-        log_info!(crate::logging::init_logger(false), "=== Inicializando Rusdi webOS ===");
+        log_info!("=== Inicializando Rusdi webOS ===");
 
         if let Some(r) = &mut self.renderer {
             let splash = std::path::Path::new("/media/developer/apps/usr/palm/applications/org.xbmc.kodi/media/splash.jpg");
@@ -52,7 +52,7 @@ impl LifeCycleManager {
         self.pvr = Some(PvrManager::new()); self.pvr.as_mut().unwrap().register(Box::new(crate::core::pvr::IptvSimpleBackend::new()));
 
         let (handler, rx) = InputHandler::new(|action| {
-            log_debug!(crate::logging::init_logger(false), "Input: {:?}", action);
+            log_debug!("Input: {:?}", action);
         });
         self.input_handler = Some(handler);
 
@@ -63,7 +63,7 @@ impl LifeCycleManager {
         tokio::spawn(async move { /* process events */ });
 
         self.state = AppState::Running;
-        log_info!(crate::logging::init_logger(false), "Rusdi pronto");
+        log_info!("Rusdi pronto");
         Ok(())
     }
 
@@ -83,7 +83,7 @@ impl LifeCycleManager {
         self.player.as_mut().map(|p| p.stop());
         self.addons.as_mut().map(|a| { for (_, addon) in &mut a.addons { let _ = addon.on_stop(); } });
         self.state = AppState::Terminated;
-        log_info!(crate::logging::init_logger(false), "Rusdi terminado");
+        log_info!("Rusdi terminado");
         Ok(())
     }
 

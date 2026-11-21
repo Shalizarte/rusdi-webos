@@ -33,7 +33,7 @@ impl InputHandler {
         let mut event_pump = sdl.event_pump()?;
         sdl.joystick()?;
 
-        log_info!(crate::logging::init_logger(false), "SDL2 input loop started");
+        log_info!("SDL2 input loop started");
 
         loop {
             for event in event_pump.poll_iter() {

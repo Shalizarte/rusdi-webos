@@ -29,7 +29,7 @@ impl EglContext {
         if unsafe { egl::Initialize(display, &mut major, &mut minor) } == 0 {
             return Err(RusdiError::EglInit(format!("Initialize: {}", Self::egl_error())));
         }
-        log_info!(crate::logging::init_logger(false), "EGL {}:{}", major, minor);
+        log_info!("EGL {}:{}", major, minor);
 
         let attr = [egl::RED_SIZE,8, egl::GREEN_SIZE,8, egl::BLUE_SIZE,8, egl::ALPHA_SIZE,8,
                     egl::DEPTH_SIZE,24, egl::STENCIL_SIZE,8, egl::RENDERABLE_TYPE,egl::OPENGL_ES2_BIT,
