@@ -1,0 +1,85 @@
+[package]
+name = "rusdi-webos"
+version = "21.0.0"
+edition = "2021"
+authors = ["Rusdi Foundation <team@rusdi.tv>"]
+description = "Rusdi Media Center - Native webOS Application in Rust"
+license = "GPL-2.0-or-later"
+repository = "https://github.com/rusdi/rusdi"
+homepage = "https://rusdi.tv"
+categories = ["multimedia", "gui", "embedded"]
+keywords = ["rusdi", "webos", "media-center", "arm", "native", "rust"]
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = "symbols"
+debug = false
+
+[profile.release-with-debug]
+inherits = "release"
+debug = true
+strip = false
+
+[target.armv7-unknown-linux-gnueabihf]
+linker = "arm-linux-gnueabihf-gcc"
+runner = "qemu-arm-static"
+
+[target.aarch64-unknown-linux-gnu]
+linker = "aarch64-linux-gnu-gcc"
+runner = "qemu-aarch64-static"
+
+[lib]
+crate-type = ["cdylib", "bin"]
+
+[[bin]]
+name = "rusdi-webos"
+path = "src/main.rs"
+
+[dependencies]
+tokio = { version = "1.38", features = ["rt-multi-thread", "macros", "signal", "time", "fs", "process", "net"] }
+sdl2 = { version = "0.37", features = ["image", "ttf", "gfx"] }
+gl = "0.14"
+egl = "0.11"
+wayland-client = { version = "0.31", features = ["client"], optional = true }
+wayland-protocols = { version = "0.31", optional = true }
+ffmpeg-next = { version = "6.0", features = ["lavformat", "lavcodec", "lavutil", "swscale", "swresample"] }
+sqlx = { version = "0.7", features = ["runtime-tokio", "sqlite", "json", "chrono", "uuid"] }
+rusqlite = { version = "0.30", features = ["bundled", "vtab", "functions"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+toml = "0.8"
+dirs = "5.0"
+slog = { version = "2.7", features = ["std", "async", "kvfilter"] }
+slog-async = "2.7"
+slog-term = "2.9"
+slog-json = "2.7"
+anyhow = "1.0"
+thiserror = "1.0"
+tokio-process = "0.1"
+signal-hook = { version = "0.3", features = ["tokio"] }
+reqwest = { version = "0.12", features = ["json", "rustls-tls", "blocking"] }
+async-tungstenite = "0.21"
+url = "2.5"
+pyo3 = { version = "0.21", features = ["extension-module", "abi3-py311"] }
+image = { version = "0.24", features = ["png", "jpeg", "gif", "webp"] }
+imageproc = "0.23"
+libc = "0.2"
+nix = { version = "0.27", features = ["process", "sys/socket", "unistd"] }
+scraper = { version = "0.13", features = ["html", "json"] }
+select = "0.6"
+cc = "1.0"
+bindgen = { version = "0.66", features = [] }
+quick-xml = "0.31"
+
+[build-dependencies]
+cc = "1.0"
+pkg-config = "0.3"
+
+[features]
+default = ["wayland", "python"]
+wayland = ["wayland-client", "wayland-protocols"]
+eglfs = []
+python = ["pyo3"]

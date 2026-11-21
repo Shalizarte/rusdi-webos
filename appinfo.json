@@ -1,0 +1,28 @@
+{
+  "id": "org.xbmc.kodi",
+  "version": "21.0.0",
+  "vendor": "Rusdi Foundation",
+  "type": "native",
+  "main": "rusdi-webos",
+  "title": "Rusdi",
+  "icon": "icon.png",
+  "largeIcon": "largeIcon.png",
+  "splashBackground": "media/applaunch_screen.png",
+  "spinnerOnLaunch": false,
+  "handlesRelaunch": true,
+  "nativeLifeCycleInterfaceVersion": 2,
+  "requiredMemory": 500,
+  "permissions": [
+    "internet",
+    "fileAccess",
+    "mediaPlayback",
+    "systemControl",
+    "audioCapture"
+  ],
+  "resolution": "1920x1080",
+  "iconColor": "#1E1E1E",
+  "bgColor": "#000000",
+  "transparent": false,
+  "disableBackHistoryAPI": false,
+  "enableWebOSComponents": true
+}

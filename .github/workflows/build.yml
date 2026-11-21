@@ -1,0 +1,54 @@
+ name: Build Rusdi webOS IPK
+ 
+ on:
+   push:
+     branches: [main]
+   workflow_dispatch:
+ 
+ jobs:
+   build:
+     runs-on: ubuntu-latest
+     timeout-minutes: 60
+     
+     steps:
+       - name: Checkout
+         uses: actions/checkout@v4
+       
+       - name: Install system dependencies
+         run: |
+           sudo apt-get update
+           sudo apt-get install -y \
+             gcc-arm-linux-gnueabihf libc6-dev-armhf-cross \
+             libsdl2-dev:armhf libsdl2-image-dev:armhf libsdl2-ttf-dev:armhf \
+             libegl1-mesa-dev:armhf libgles2-mesa-dev:armhf \
+             libwayland-dev:armhf pkg-config cmake \
+             nodejs npm
+       
+       - name: Install Rust (armv7 target)
+         uses: dtolnay/rust-toolchain@stable
+         with:
+           targets: armv7-unknown-linux-gnueabihf
+       
+       - name: Cache cargo
+         uses: actions/cache@v4
+         with:
+           path: |
+             ~/.cargo/registry
+             ~/.cargo/git
+             target
+           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+       
+       - name: Install ares-cli
+         run: npm install -g @webosbrew/ares-cli
+       
+       - name: Build IPK
+         run: |
+           chmod +x packaging/build.sh
+           ./packaging/build.sh armv7-unknown-linux-gnueabihf
+       
+       - name: Upload IPK artifact
+         uses: actions/upload-artifact@v4
+         with:
+           name: rusdi-webos-ipk
+           path: rusdi-webos_21.0.0_armv7_unknown_linux_gnueabihf.ipk
+           retention-days: 30

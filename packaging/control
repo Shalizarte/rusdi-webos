@@ -1,0 +1,10 @@
+Package: org.xbmc.kodi
+Version: 21.0.0
+Section: multimedia
+Priority: optional
+Architecture: arm
+Installed-Size: 200000
+Maintainer: Rusdi Foundation <team@rusdi.tv>
+Description: Rusdi Media Center - Native Rust Application for webOS
+webOS-Package-Format-Version: 2
+webOS-Packager-Version: 1.0.0
