@@ -39,7 +39,7 @@
            key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
        
        - name: Install ares-cli
-         run: npm install -g @webosbrew/ares-cli
+         run: npm install -g @webosose/ares-cli
        
        - name: Build IPK
          run: |
