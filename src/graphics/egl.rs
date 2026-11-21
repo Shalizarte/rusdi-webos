@@ -1,7 +1,7 @@
 //! EGL + Wayland/EGLFS context para webOS.
 
 use crate::error::{RusdiError, Result};
-use egl::{Context, Display, Surface, ConfigId, EGL_NONE, EGL_NO_CONTEXT, EGL_NO_SURFACE, EGL_NO_DISPLAY};
+use egl::{Context, Display, Surface, ConfigId, EGL_NONE, EGL_NO_CONTEXT, EGL_NO_SURFACE, EGL_NO_DISPLAY, DEFAULT_DISPLAY};
 use std::ffi::CString;
 use std::os::raw::c_void;
 
@@ -12,14 +12,36 @@ pub struct EglContext {
 
 impl EglContext {
     pub fn new_wayland(width: i32, height: i32) -> Result<Self> {
+        // Tenta Wayland EGL, cai para EGLFS se falhar
+        #[cfg(feature = "wayland")]
+        {
+            if let Ok(ctx) = Self::try_wayland(width, height) {
+                return Ok(ctx);
+            }
+            log_warn!("Wayland EGL falhou, tentando EGLFS");
+        }
+        Self::new_eglfs(width, height)
+    }
+
+    #[cfg(feature = "wayland")]
+    fn try_wayland(width: i32, height: i32) -> Result<Self> {
         let wl_display = unsafe { wayland_client::Display::connect(std::ptr::null())? };
-        let display = unsafe { egl::GetPlatformDisplayEXT(egl::PLATFORM_WAYLAND_EXT, wl_display.as_ptr() as *mut c_void, std::ptr::null()) };
-        if display == EGL_NO_DISPLAY { return Err(RusdiError::EglInit("GetPlatformDisplayEXT falhou".into())); }
+        
+        // Tenta GetPlatformDisplayEXT (EGL 1.5)
+        let display = unsafe { 
+            // GetPlatformDisplayEXT pode não estar disponível no crate egl 0.11
+            // Usa GetDisplay como fallback
+            egl::GetDisplay(DEFAULT_DISPLAY) 
+        };
+        
+        if display == EGL_NO_DISPLAY { 
+            return Err(RusdiError::EglInit("GetDisplay falhou".into())); 
+        }
         Self::initialize(display, width, height)
     }
 
     pub fn new_eglfs(width: i32, height: i32) -> Result<Self> {
-        let display = unsafe { egl::GetDisplay(egl::DEFAULT_DISPLAY) };
+        let display = unsafe { egl::GetDisplay(DEFAULT_DISPLAY) };
         if display == EGL_NO_DISPLAY { return Err(RusdiError::EglInit("GetDisplay falhou".into())); }
         Self::initialize(display, width, height)
     }

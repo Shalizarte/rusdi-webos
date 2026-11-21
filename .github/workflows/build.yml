@@ -19,25 +19,33 @@ jobs:
           set -x
           sudo apt-get update
           
-          # Try to install armhf packages, skip if not available
+          # Cross-compiler & base
           sudo apt-get install -y \
             gcc-arm-linux-gnueabihf libc6-dev-armhf-cross \
             pkg-config cmake \
             nodejs npm \
             qemu-user-static 2>&1 | tee install.log
           
-          # Try SDL2/EGL/GLES armhf packages (may not exist on all Ubuntu versions)
+          # SDL2, EGL, GLES, Wayland (armhf)
           sudo apt-get install -y \
             libsdl2-dev:armhf libsdl2-image-dev:armhf libsdl2-ttf-dev:armhf \
             libegl1-mesa-dev:armhf libgles2-mesa-dev:armhf \
             libwayland-dev:armhf 2>&1 | tee -a install.log || echo "Some armhf packages unavailable, continuing..."
           
-          # Verify cross-compiler
-          arm-linux-gnueabihf-gcc --version
+          # Python 3.11 para pyo3 (armhf)
+          sudo apt-get install -y python3.11-dev:armhf 2>&1 | tee -a install.log || echo "python3.11-dev:armhf not available, trying python3-dev:armhf"
+          sudo apt-get install -y python3-dev:armhf 2>&1 | tee -a install.log || true
           
-          # Show pkg-config paths for debugging
+          # FFmpeg para ffmpeg_next (armhf)
+          sudo apt-get install -y libavcodec-dev:armhf libavformat-dev:armhf libavutil-dev:armhf \
+            libswscale-dev:armhf libswresample-dev:armhf 2>&1 | tee -a install.log || echo "FFmpeg armhf packages unavailable, continuing..."
+          
+          # Verificações
+          arm-linux-gnueabihf-gcc --version
           echo "=== PKG_CONFIG_PATH ===" 
           pkg-config --variable=pc_path pkg-config || true
+          echo "=== SDL2 armhf ==="
+          pkg-config --libs --cflags sdl2 2>/dev/null || echo "SDL2 pkg-config not found for armhf"
       
       - name: Install Rust (armv7 target)
         uses: dtolnay/rust-toolchain@stable
@@ -56,7 +64,6 @@ jobs:
       - name: Install ares-cli
         run: |
           npm install -g @webosose/ares-cli
-          # Verify ares-package is available
           which ares-package || find /usr -name "ares-package" 2>/dev/null || npm list -g @webosose/ares-cli
       
       - name: Build IPK
@@ -64,14 +71,11 @@ jobs:
           set -x
           chmod +x packaging/build.sh
           
-          # Set PKG_CONFIG_PATH for cross-compilation
           export PKG_CONFIG_ALLOW_CROSS=1
-          export PKG_CONFIG_PATH=/usr/lib/arm-linux-gnueabihf/pkgconfig:/usr/share/pkgconfig:${PKG_CONFIG_PATH}
+          export PKG_CONFIG_PATH=/usr/lib/arm-linux-gnueabihf/pkgconfig:/usr/share/pkgconfig:/usr/lib/pkgconfig:${PKG_CONFIG_PATH}
           
-          # Verbose cargo build
           cargo build --release --target=armv7-unknown-linux-gnueabihf --verbose 2>&1 | tee cargo_build.log
           
-          # Run the packaging script
           ./packaging/build.sh armv7-unknown-linux-gnueabihf 2>&1 | tee package_build.log
       
       - name: Upload IPK artifact
@@ -89,4 +93,5 @@ jobs:
           path: |
             cargo_build.log
             package_build.log
+            install.log
           retention-days: 7
